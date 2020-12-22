@@ -2,6 +2,7 @@ import requests
 import json
 import time
 import uvicorn
+import argparse
 from blockchain_model import Block, Blockchain
 from fastapi import FastAPI, Request
 from hashlib import sha256
@@ -155,4 +156,11 @@ def announce_new_block(block):
                       data=json.dumps(block.__dict__, sort_keys=True),
                       headers=headers)
 
-uvicorn.run(app)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-p", "--port", help="Set the port to run blockchain", default=8000, type=int)
+    parser.add_argument("--host", help="Set the host to run blockchain", default="0.0.0.0")
+
+    args = parser.parse_args()
+    uvicorn.run(app, host=args.host, port=args.port)
