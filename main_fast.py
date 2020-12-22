@@ -5,6 +5,7 @@ import uvicorn
 import argparse
 from blockchain_model import Block, Blockchain
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
 from hashlib import sha256
 from pydantic import BaseModel
 app = FastAPI()
@@ -13,6 +14,19 @@ blockchain = Blockchain()
 blockchain.create_genesis_block()
 peers = set()
 
+class NewTransaction(BaseModel):
+    author: str
+    content: str
+
+class Node(BaseModel):
+    node_address: str
+
+class NewBlock(BaseModel):
+    index: int
+    transactions: str
+    timestamp: float
+    previous_hash: str
+    nonce: int
 
 @app.post('/')
 async def index(request: Request):
@@ -20,17 +34,14 @@ async def index(request: Request):
     print(data)
 
 @app.post('/new_transaction')
-async def new_transaction(request: Request):
+async def new_transaction(request: Request, transaction: NewTransaction):
     data = await request.json()
-    required_fields = ['author', 'content']
-    for field in required_fields:
-        if not data.get(field):
-            return "Invalid transaction data"
-    data["timestamp"] = time.time()
+    transaction_data = jsonable_encoder(transaction)
+
+    transaction_data["timestamp"] = time.time()
     blockchain.add_new_transaction(data)
     
     return "Success", 201
-
 
 @app.get('/chain')
 async def get_chain():
@@ -56,14 +67,14 @@ async def mine_unconfirmed_transactions():
     return f"Block #{blockchain.last_block.index} has been mined."
 
 @app.post('/register_node')
-async def register_new_piers(request: Request):
-    data = await request.json()
+async def register_new_piers(request: Request, node: Node):
+    data = jsonable_encoder(node)
     node_address = data["node_address"]
     peers.add(node_address)
     return await get_chain()
 
 @app.post('/register_with')
-async def register_with_existing_node(request: Request):
+async def register_with_existing_node(request: Request, node: Node):
     data = await request.json()
     node_address = data["node_address"]
     data = {"node_address": str(request.url)}
@@ -81,7 +92,7 @@ async def register_with_existing_node(request: Request):
 
 
 @app.post('/add_block')
-async def verify_and_add_block(request: Request):
+async def verify_and_add_block(request: Request, new_block: NewBlock):
     data = await request.json()
     block = Block(index=data["index"],
                   transactions=data["transactions"],
