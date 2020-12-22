@@ -28,10 +28,9 @@ class NewBlock(BaseModel):
     previous_hash: str
     nonce: int
 
-@app.post('/')
+@app.get('/')
 async def index(request: Request):
-    data = await request.json()
-    print(data)
+    return "Nothing here. Go away", 401
 
 @app.post('/new_transaction')
 async def new_transaction(request: Request, transaction: NewTransaction):
