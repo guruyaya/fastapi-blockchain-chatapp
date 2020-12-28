@@ -1,0 +1,93 @@
+#:kivy 1.8.0
+
+<BCStart>:
+    BoxLayout:
+        orientation: "vertical"
+        size: root.size
+        spacing: 20
+        padding: 20
+
+        Label:
+            text: "Main Menu"
+            size_hint: (1, 0.05)
+        Button:
+            size_hint: (1, 0.85)
+            text: "Start Server"
+            on_release:
+                root.manager.current = "chat_control"
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: (1, 0.1)
+            Label:
+                text: ""
+            Button:
+                text: "Quit"
+                on_release:
+                    app.stop()
+
+<ChatControl>:        
+    send_chat: send_chat
+    your_text: your_text
+    your_name: your_name
+    chat: chat
+
+    BoxLayout:
+        orientation: "vertical"
+        size: root.size
+        spacing: 20
+        padding: 20
+
+        TextInput:
+            id: chat
+            size_hint: (1, 0.60)
+            disabled: True
+
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: (1, 0.25)
+
+            Label:
+                text: "Your Text"
+                size_hint: (0.1, 1)
+            TextInput:
+                id: your_text
+                size_hint: (0.9, 1)
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint: (1, 0.1)
+
+            Label:
+                text: "Your Name"
+                size_hint: (0.1, 1)
+            TextInput:
+                size_hint: (0.8, 1)
+                id: your_name
+                multiline: False
+            Button:
+                size_hint: (0.1, 1)
+                id: send_chat
+                text: "Send"
+                on_release:
+                    app.send_your_message_to_blockchain()
+                    
+        Button:
+            id: stop_server
+            text: "Stop Server"
+            size_hint: (1, 0.05)
+            on_release:
+                root.manager.current = "bc_start"
+<Manager>:
+    id: screen_manager
+
+    bc_start: bc_start
+    chat_control: chat_control
+
+    BCStart:
+        id: bc_start
+        name: "bc_start"
+        manager: screen_manager
+
+    ChatControl:
+        id: chat_control
+        name: "chat_control"
+        manager: screen_manager
